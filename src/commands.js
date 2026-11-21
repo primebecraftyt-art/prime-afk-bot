@@ -4,7 +4,7 @@ function attachCommands(bot, config, logger, getStatus) {
   bot.on('chat', (username, message) => {
     if (username.toLowerCase() === bot.username.toLowerCase() || !allowed.has(username.toLowerCase())) return;
     if (!message.startsWith('!')) return;
-    const [command, ...args] = message.slice(1).trim().split(/\\s+/);
+    const [command, ...args] = message.slice(1).trim().split(/\s+/);
     if (command === 'status') {
       const state = getStatus();
       bot.chat(state.connected ? 'Prime AFK Bot: connected.' : 'Prime AFK Bot: disconnected.');
