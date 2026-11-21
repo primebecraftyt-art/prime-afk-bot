@@ -1,0 +1,6 @@
+{
+  "server": { "host": "your-server.example.net", "port": 25565, "version": "1.20.4" },
+  "bot": { "username": "PrimeBot", "auth": "offline", "reconnect": true, "reconnectMinMs": 5000, "reconnectMaxMs": 120000 },
+  "health": { "enabled": true, "port": 3000 },
+  "logging": { "level": "info", "file": "logs/prime-afk-bot.log" }
+}
