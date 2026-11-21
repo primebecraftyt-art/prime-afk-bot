@@ -3,13 +3,22 @@
   "version": "1.0.0",
   "description": "A monitored Mineflayer client with safe reconnects for Minecraft servers you are authorized to access.",
   "main": "src/index.js",
-  "scripts": { "start": "node src/index.js", "check": "node --check src/index.js && node --check src/bot.js && node --check src/serverPing.js && node --check src/health.js" },
-  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node src/index.js",
+    "check": "node --check src/index.js && node --check src/bot.js && node --check src/serverPing.js && node --check src/health.js && node --check src/commands.js && node --check src/notifier.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mineflayer": "^4.28.0",
     "minecraft-protocol": "^1.54.0",
     "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "proxyquire": "^2.1.3"
   }
 }
