@@ -9,7 +9,8 @@
     "auth": "offline",
     "reconnect": true,
     "reconnectMinMs": 5000,
-    "reconnectMaxMs": 120000
+    "reconnectMaxMs": 120000,
+    "loginTimeoutMs": 30000
   },
   "health": {
     "enabled": true,
