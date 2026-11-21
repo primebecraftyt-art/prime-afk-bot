@@ -132,7 +132,8 @@ These run the included reconnect tests and syntax checks; they do not replace a 
 prime-afk-bot/
 ├── src/ (index.js, bot.js, reconnect.js, serverPing.js, commands.js, notifier.js, logger.js, health.js)
 ├── test/ (reconnect and command tests)
-├── .github/workflows/node.yml\n├── helper/README.md
+├── .github/workflows/node.yml
+├── helper/README.md
 ├── systemd/prime-afk-bot.service.example
 ├── config.example.json
 ├── .env.example
