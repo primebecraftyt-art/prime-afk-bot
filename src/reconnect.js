@@ -28,7 +28,7 @@ class ReconnectController {
     this.delay = this.minMs;
     if (this.timer) { clearTimeout(this.timer); this.timer = null; }
   }
-  disconnected() { this.schedule(this.delay); }
+  disconnected() {\n    const retryDelay = this.delay;\n    this.delay = Math.min(this.delay * 2, this.maxMs);\n    this.schedule(retryDelay);\n  }
   stop() { this.stopped = true; if (this.timer) clearTimeout(this.timer); this.timer = null; }
 }
 module.exports = { ReconnectController };
