@@ -6,6 +6,7 @@ const { createBot } = require('./bot');
 const { pingServer } = require('./serverPing');
 const { startHealthServer } = require('./health');
 const { ReconnectController } = require('./reconnect');
+const { createNotifier } = require('./notifier');
 
 function loadConfig() {
   const file = path.resolve(process.env.CONFIG_FILE || 'config.json');
@@ -25,18 +26,23 @@ async function main() {
   const logger = createLogger(config.logging);
   let bot = null, connected = false, lastError = null, lastConnectedAt = null, shuttingDown = false;
   const status = () => ({ connected, username: config.bot.username, host: config.server.host, lastConnectedAt, lastError });
+  const notifier = createNotifier(process.env.DISCORD_WEBHOOK_URL || config.notifications?.discordWebhookUrl, logger);
+  let offlineAlertSent = false;
+  const notifyOffline = async (reason) => { if (!offlineAlertSent) { offlineAlertSent = true; await notifier.send('Prime AFK Bot disconnected: ' + String(reason || 'unknown')); } };
   const closeHealth = config.health.enabled ? startHealthServer({ port: config.health.port, getStatus: status, logger }) : async () => {};
 
   const reconnect = new ReconnectController({
     minMs: config.bot.reconnectMinMs, maxMs: config.bot.reconnectMaxMs, logger,
     connect: async () => {
       const ping = await pingServer(config.server);
-      if (!ping.online) { connected = false; lastError = ping.reason; logger.warn('Server is not responding to status ping: ' + ping.reason); return false; }
+      if (!ping.online) { connected = false; lastError = ping.reason; logger.warn('Server is not responding to status ping: ' + ping.reason); await notifyOffline(ping.reason); return false; }
       logger.info('Server responded to status ping; connecting');
       bot = createBot(config, logger, {
-        onConnected: () => { connected = true; lastConnectedAt = new Date().toISOString(); lastError = null; reconnect.connected(); },
-        onEnded: reason => { connected = false; lastError = String(reason || 'Connection ended'); if (!shuttingDown && config.bot.reconnect) reconnect.disconnected(); }
+        onConnected: () => { const wasOffline = !connected; connected = true; lastConnectedAt = new Date().toISOString(); lastError = null; offlineAlertSent = false; reconnect.connected(); if (wasOffline) notifier.send('Prime AFK Bot connected to ' + config.server.host); },
+        onEnded: reason => { connected = false; lastError = String(reason || 'Connection ended'); notifier.send('Prime AFK Bot connection ended: ' + lastError); if (!shuttingDown && config.bot.reconnect) reconnect.disconnected(); }
       });
+      const { attachCommands } = require('./commands');
+      attachCommands(bot, config, logger, status);
     }
   });
   reconnect.start();
