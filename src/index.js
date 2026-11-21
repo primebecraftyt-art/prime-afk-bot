@@ -31,7 +31,7 @@ async function main() {
     minMs: config.bot.reconnectMinMs, maxMs: config.bot.reconnectMaxMs, logger,
     connect: async () => {
       const ping = await pingServer(config.server);
-      if (!ping.online) { connected = false; lastError = ping.reason; logger.warn('Server is not responding to status ping: ' + ping.reason); reconnect.disconnected(); return; }
+      if (!ping.online) { connected = false; lastError = ping.reason; logger.warn('Server is not responding to status ping: ' + ping.reason); return false; }
       logger.info('Server responded to status ping; connecting');
       bot = createBot(config, logger, {
         onConnected: () => { connected = true; lastConnectedAt = new Date().toISOString(); lastError = null; reconnect.connected(); },
