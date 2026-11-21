@@ -27,7 +27,16 @@ async function main() {
   let bot = null, connected = false, lastError = null, lastConnectedAt = null, lastDisconnectedAt = null, shuttingDown = false;
   const status = () => ({ connected, username: config.bot.username, host: config.server.host, lastConnectedAt, lastError });
   const notifier = createNotifier(process.env.DISCORD_WEBHOOK_URL || config.notifications?.discordWebhookUrl, logger);
-  let offlineAlertSent = false;\n  let longOfflineAlertSent = false;\n  const offlineThresholdMs = Math.max(1, Number(config.notifications?.offlineAlertMinutes || 15)) * 60_000;\n  const offlineWatch = setInterval(() => {\n    if (!connected && lastDisconnectedAt && !longOfflineAlertSent && Date.now() - lastDisconnectedAt >= offlineThresholdMs) {\n      longOfflineAlertSent = true;\n      notifier.send('Prime AFK Bot has been disconnected for more than ' + (offlineThresholdMs / 60_000) + ' minutes.');\n    }\n  }, 60_000);\n  offlineWatch.unref?.();
+  let offlineAlertSent = false;
+  let longOfflineAlertSent = false;
+  const offlineThresholdMs = Math.max(1, Number(config.notifications?.offlineAlertMinutes || 15)) * 60_000;
+  const offlineWatch = setInterval(() => {
+    if (!connected && lastDisconnectedAt && !longOfflineAlertSent && Date.now() - lastDisconnectedAt >= offlineThresholdMs) {
+      longOfflineAlertSent = true;
+      notifier.send('Prime AFK Bot has been disconnected for more than ' + (offlineThresholdMs / 60_000) + ' minutes.');
+    }
+  }, 60_000);
+  offlineWatch.unref?.();
   const notifyOffline = async (reason) => { if (!offlineAlertSent) { offlineAlertSent = true; await notifier.send('Prime AFK Bot disconnected: ' + String(reason || 'unknown')); } };
   const closeHealth = config.health.enabled ? startHealthServer({ port: config.health.port, getStatus: status, logger }) : async () => {};
 
