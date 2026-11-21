@@ -35,7 +35,7 @@ async function main() {
     minMs: config.bot.reconnectMinMs, maxMs: config.bot.reconnectMaxMs, logger,
     connect: async () => {
       const ping = await pingServer(config.server);
-      if (!ping.online) { connected = false; lastDisconnectedAt ||= Date.now(); lastError = ping.reason; logger.warn('Server is not responding to status ping: ' + ping.reason); await notifyOffline(ping.reason); return false; }
+      if (!ping.online) { connected = false; lastDisconnectedAt ||= Date.now(); lastError = ping.reason; logger.warn('Server is not responding to status ping: ' + ping.reason); await notifyOffline(ping.reason); return config.bot.reconnect !== false ? false : true; }
       logger.info('Server responded to status ping; connecting');
       bot = createBot(config, logger, {
         onConnected: () => { const wasOffline = !connected; connected = true; lastDisconnectedAt = null; longOfflineAlertSent = false; lastConnectedAt = new Date().toISOString(); lastError = null; offlineAlertSent = false; reconnect.connected(); if (wasOffline) notifier.send('Prime AFK Bot connected to ' + config.server.host); },
