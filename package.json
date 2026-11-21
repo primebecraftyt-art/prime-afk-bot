@@ -17,8 +17,5 @@
     "mineflayer": "^4.28.0",
     "minecraft-protocol": "^1.54.0",
     "winston": "^3.17.0"
-  },
-  "devDependencies": {
-    "proxyquire": "^2.1.3"
   }
 }
