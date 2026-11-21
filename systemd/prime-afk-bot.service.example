@@ -1,0 +1,16 @@
+[Unit]
+Description=Prime AFK Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=minecraft
+WorkingDirectory=/opt/prime-afk-bot
+ExecStart=/usr/bin/node /opt/prime-afk-bot/src/index.js
+Restart=on-failure
+RestartSec=10
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
