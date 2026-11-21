@@ -1,0 +1,57 @@
+require('dotenv').config();
+const fs = require('node:fs');
+const path = require('node:path');
+const { createLogger } = require('./logger');
+const { createBot } = require('./bot');
+const { pingServer } = require('./serverPing');
+const { startHealthServer } = require('./health');
+const { ReconnectController } = require('./reconnect');
+
+function loadConfig() {
+  const file = path.resolve(process.env.CONFIG_FILE || 'config.json');
+  const base = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : JSON.parse(fs.readFileSync(path.resolve('config.example.json'), 'utf8'));
+  base.server.host = process.env.MC_HOST || base.server.host;
+  base.server.port = Number(process.env.MC_PORT || base.server.port);
+  base.server.version = process.env.MC_VERSION || base.server.version;
+  base.bot.username = process.env.MC_USERNAME || base.bot.username;
+  base.bot.auth = process.env.MC_AUTH || base.bot.auth;
+  base.health.port = Number(process.env.HEALTH_PORT || base.health.port);
+  if (!base.server.host || base.server.host.startsWith('your-server')) throw new Error('Set server.host in config.json or MC_HOST in .env');
+  return base;
+}
+
+async function main() {
+  const config = loadConfig();
+  const logger = createLogger(config.logging);
+  let bot = null, connected = false, lastError = null, lastConnectedAt = null, shuttingDown = false;
+  const status = () => ({ connected, username: config.bot.username, host: config.server.host, lastConnectedAt, lastError });
+  const closeHealth = config.health.enabled ? startHealthServer({ port: config.health.port, getStatus: status, logger }) : async () => {};
+
+  const reconnect = new ReconnectController({
+    minMs: config.bot.reconnectMinMs, maxMs: config.bot.reconnectMaxMs, logger,
+    connect: async () => {
+      const ping = await pingServer(config.server);
+      if (!ping.online) { connected = false; lastError = ping.reason; logger.warn('Server is not responding to status ping: ' + ping.reason); reconnect.disconnected(); return; }
+      logger.info('Server responded to status ping; connecting');
+      bot = createBot(config, logger, {
+        onConnected: () => { connected = true; lastConnectedAt = new Date().toISOString(); lastError = null; reconnect.connected(); },
+        onEnded: reason => { connected = false; lastError = String(reason || 'Connection ended'); if (!shuttingDown && config.bot.reconnect) reconnect.disconnected(); }
+      });
+    }
+  });
+  reconnect.start();
+
+  async function shutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true; logger.info(`Received ${signal}; shutting down`);
+    reconnect.stop();
+    try { bot?.quit('Bot process shutting down'); } catch (error) { logger.warn(error.message); }
+    await closeHealth();
+    process.exit(0);
+  }
+  process.once('SIGINT', () => shutdown('SIGINT'));
+  process.once('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('unhandledRejection', reason => logger.error('Unhandled rejection: ' + String(reason)));
+  process.on('uncaughtException', error => { logger.error('Uncaught exception: ' + error.stack); shutdown('uncaughtException'); });
+}
+main().catch(error => { console.error(error); process.exitCode = 1; });
