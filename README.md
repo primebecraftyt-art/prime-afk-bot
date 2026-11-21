@@ -35,7 +35,7 @@ The app reads private `config.json` when present; otherwise it reads the example
 | `bot.auth` | `offline` | `offline` or `microsoft`, as permitted by server |
 | `bot.reconnect` | `true` | Reconnect toggle |
 | `bot.reconnectMinMs` | `5000` | Initial retry delay |
-| `bot.reconnectMaxMs` | `120000` | Maximum retry delay |
+| `bot.reconnectMaxMs` | `120000` | Maximum retry delay |\n| `bot.loginTimeoutMs` | `30000` | Max wait for Minecraft login before retry |
 | `health.enabled` | `true` | Enable HTTP health endpoint |
 | `health.port` | `3000` | Health server port |
 | `logging.level` | `info` | Winston log level |
