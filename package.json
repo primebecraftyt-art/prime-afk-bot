@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "check": "node --check src/index.js && node --check src/bot.js && node --check src/serverPing.js && node --check src/health.js && node --check src/commands.js && node --check src/notifier.js",
+    "check": "node --check src/index.js && node --check src/bot.js && node --check src/reconnect.js && node --check src/serverPing.js && node --check src/health.js && node --check src/commands.js && node --check src/notifier.js && node --check src/logger.js",
     "test": "node --test"
   },
   "engines": {
