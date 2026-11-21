@@ -11,7 +11,8 @@ function createBot(config, logger, handlers = {}) {
   let ended = false;
   const loginTimer = setTimeout(() => {
     if (ended) return;
-    ended = true;\n    logger.warn('Login timed out; closing this connection attempt');
+    ended = true;
+    logger.warn('Login timed out; closing this connection attempt');
     try { bot.quit('Login timeout'); } catch (error) { logger.warn(error.message); }
     handlers.onEnded?.('Login timeout');
   }, Number(config.bot.loginTimeoutMs || 30000));
