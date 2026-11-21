@@ -14,6 +14,7 @@ function createBot(config, logger, handlers = {}) {
   bot.on('error', error => logger.error('Minecraft client error: ' + error.message));
   bot.once('end', reason => { logger.warn('Connection ended: ' + String(reason || 'unknown')); handlers.onEnded?.(reason); });
   bot.on('death', () => logger.info('Bot died; waiting for normal server respawn handling'));
+  bot.on('message', message => logger.debug('Server message: ' + message.toString().slice(0, 500)));
   return bot;
 }
 module.exports = { createBot };
