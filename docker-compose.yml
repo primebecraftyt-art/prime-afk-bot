@@ -1,0 +1,11 @@
+services:
+  prime-afk-bot:
+    build: .
+    container_name: prime-afk-bot
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - ./logs:/app/logs
+    ports:
+      - "${HEALTH_PORT:-3000}:3000"
