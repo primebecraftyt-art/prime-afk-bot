@@ -8,4 +8,4 @@ services:
       - ./config.json:/app/config.json:ro
       - ./logs:/app/logs
     ports:
-      - "${HEALTH_PORT:-3000}:3000"
+      - "${HEALTH_PORT:-3000}:${HEALTH_PORT:-3000}"
