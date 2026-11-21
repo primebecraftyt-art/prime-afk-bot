@@ -19,7 +19,7 @@ function createBot(config, logger, handlers = {}) {
   loginTimer.unref?.();
   bot.once('login', () => { clearTimeout(loginTimer); logger.info('Minecraft login successful'); handlers.onConnected?.(bot); });
   bot.on('spawn', () => logger.info('Bot spawned in the world'));
-  bot.on('kicked', reason => logger.warn('Kicked by server: ' + String(reason)));
+  bot.on('kicked', reason => { logger.warn('Kicked by server: ' + String(reason)); handlers.onKicked?.(reason); });
   bot.on('error', error => logger.error('Minecraft client error: ' + error.message));
   bot.once('end', reason => { if (ended) return; ended = true; clearTimeout(loginTimer); logger.warn('Connection ended: ' + String(reason || 'unknown')); handlers.onEnded?.(reason); });
   bot.on('death', () => logger.info('Bot died; waiting for normal server respawn handling'));
