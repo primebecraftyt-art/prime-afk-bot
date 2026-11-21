@@ -7,15 +7,27 @@ class ReconnectController {
   schedule(delay = this.delay) {
     if (this.stopped || this.timer || this.connecting) return;
     this.timer = setTimeout(async () => {
-      this.timer = null; if (this.stopped) return;
+      this.timer = null;
+      if (this.stopped) return;
       this.connecting = true;
-      try { await this.connect(); } catch (error) { this.logger.error('Connect attempt failed: ' + error.message); }
-      finally { this.connecting = false; }
-      this.delay = Math.min(this.delay * 2, this.maxMs);
+      let retry = false;
+      try { retry = (await this.connect()) === false; }
+      catch (error) { this.logger.error('Connect attempt failed: ' + error.message); retry = true; }
+      finally {
+        this.connecting = false;
+        if (retry && !this.stopped) {
+          const nextDelay = this.delay;
+          this.delay = Math.min(this.delay * 2, this.maxMs);
+          this.schedule(nextDelay);
+        }
+      }
     }, delay);
     this.timer.unref?.();
   }
-  connected() { this.delay = this.minMs; }
+  connected() {
+    this.delay = this.minMs;
+    if (this.timer) { clearTimeout(this.timer); this.timer = null; }
+  }
   disconnected() { this.schedule(this.delay); }
   stop() { this.stopped = true; if (this.timer) clearTimeout(this.timer); this.timer = null; }
 }
