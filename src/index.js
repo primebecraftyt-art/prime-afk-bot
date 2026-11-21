@@ -47,7 +47,8 @@ async function main() {
       if (!ping.online) { connected = false; lastDisconnectedAt ||= Date.now(); lastError = ping.reason; logger.warn('Server is not responding to status ping: ' + ping.reason); await notifyOffline(ping.reason); return config.bot.reconnect !== false ? false : true; }
       logger.info('Server responded to status ping; connecting');
       bot = createBot(config, logger, {
-        onKicked: reason => notifier.send('Prime AFK Bot was kicked: ' + String(reason).slice(0, 500)),\n        onConnected: () => { const wasOffline = !connected; connected = true; lastDisconnectedAt = null; longOfflineAlertSent = false; lastConnectedAt = new Date().toISOString(); lastError = null; offlineAlertSent = false; reconnect.connected(); if (wasOffline) notifier.send('Prime AFK Bot connected to ' + config.server.host); },
+        onKicked: reason => notifier.send('Prime AFK Bot was kicked: ' + String(reason).slice(0, 500)),
+        onConnected: () => { const wasOffline = !connected; connected = true; lastDisconnectedAt = null; longOfflineAlertSent = false; lastConnectedAt = new Date().toISOString(); lastError = null; offlineAlertSent = false; reconnect.connected(); if (wasOffline) notifier.send('Prime AFK Bot connected to ' + config.server.host); },
         onEnded: reason => { connected = false; lastDisconnectedAt ||= Date.now(); lastError = String(reason || 'Connection ended'); notifier.send('Prime AFK Bot connection ended: ' + lastError); if (!shuttingDown && config.bot.reconnect) reconnect.disconnected(); }
       });
       const { attachCommands } = require('./commands');
