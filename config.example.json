@@ -20,7 +20,8 @@
     "file": "logs/prime-afk-bot.log"
   },
   "notifications": {
-    "discordWebhookUrl": ""
+    "discordWebhookUrl": "",
+    "offlineAlertMinutes": 15
   },
   "commands": {
     "enabled": false,
